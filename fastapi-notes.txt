@@ -1,0 +1,135 @@
+pwd
+/home/dima/projects/python/fastapi-pet
+
+
+python3.11 -m venv venv
+
+source venv/bin/activate
+
+
+pip install --upgrade pip
+pip install fastapi uvicorn
+
+pip list
+
+nano main.py
+
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+
+
+uvicorn main:app --reload
+
+INFO:     Will watch for changes in these directories: ['/home/dima/projects/python/fastapi-pet']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [10896] using StatReload
+INFO:     Started server process [10898]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     127.0.0.1:59280 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59280 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:35054 - "GET /docs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35054 - "GET /openapi.json HTTP/1.1" 200 OK
+
+
+
+http://127.0.0.1:8000/health
+http://127.0.0.1:8000/docs
+
+
+тут ниже не принципиально активировано ли venv или нет
+
+sudo apt update
+sudo apt install -y docker.io
+sudo apt install -y docker-compose
+
+docker --version
+docker-compose version
+
+cd ~/projects/python/fastapi-pet
+
+# Добавьте пользователя в группу docker
+sudo usermod -aG docker $USER
+
+# Примените изменения без перезагрузки
+newgrp docker
+
+# Проверьте что вы в группе docker
+groups $USER
+
+# Проверьте доступ
+docker ps
+
+
+
+
+
+cat > docker-compose.yml << 'EOF'
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fastapi_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fastapi_user
+      POSTGRES_PASSWORD: fastapi_password
+      POSTGRES_DB: fastapi_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fastapi_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+EOF
+
+
+docker-compose up -d
+
+dima@dima-MS-7D22:~/projects/python/fastapi-pet$ docker-compose ps
+   Name                 Command                 State                        Ports                  
+----------------------------------------------------------------------------------------------------
+fastapi_db   docker-entrypoint.sh postgres   Up (healthy)   0.0.0.0:5432->5432/tcp,:::5432->5432/tcp
+
+
+
+# Войдите в контейнер PostgreSQL и выполните команды
+docker exec -it fastapi_db psql -U fastapi_user -d fastapi_db -c "SELECT version();"
+
+dima@dima-MS-7D22:~/projects/python/fastapi-pet$ docker exec -it fastapi_db psql -U fastapi_user -d fastapi_db -c "SELECT version();"
+                                         version                                          
+------------------------------------------------------------------------------------------
+ PostgreSQL 15.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+(1 row)
+
+
+
+# Или интерактивно
+docker exec -it fastapi_db psql -U fastapi_user -d fastapi_db
+
+psql (15.15)
+Type "help" for help.
+
+fastapi_db=# select version();
+                                         version                                          
+------------------------------------------------------------------------------------------
+ PostgreSQL 15.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+(1 row)
+
+fastapi_db=# exit
+
+
