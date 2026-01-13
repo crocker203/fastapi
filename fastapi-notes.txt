@@ -133,3 +133,130 @@ fastapi_db=# select version();
 fastapi_db=# exit
 
 
+
+
+
+
+
+# Активируем виртуальное окружение
+source venv/bin/activate
+
+# Устанавливаем основные зависимости
+pip install sqlalchemy psycopg2-binary python-dotenv
+
+# Создаем requirements.txt
+pip freeze > requirements.txt
+
+
+
+
+
+
+
+# Создаем структуру папок
+mkdir -p app/{routers,models,schemas}
+touch app/__init__.py
+touch app/{main.py,database.py,models.py,schemas.py,crud.py}
+touch app/routers/__init__.py
+touch app/routers/{users.py,items.py,auth.py}
+
+# Создаем конфигурационные файлы
+touch .env .gitignore alembic.ini
+
+
+
+
+# .env
+DATABASE_URL=postgresql://fastapi_user:fastapi_password@localhost:5432/fastapi_db
+SECRET_KEY=your-secret-key-here-change-in-production
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+
+
+
+# Инициализируем git в корне проекта
+git init
+
+# Проверяем статус
+git status
+
+
+
+
+# Создаем .gitignore с правильным содержимым
+cat > .gitignore << 'EOF'
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.development
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Database
+*.db
+*.sqlite3
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+
+# Coverage
+.coverage
+htmlcov/
+.coverage.*
+.pytest_cache/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+.eggs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Alembic
+alembic.ini
+alembic/
+EOF
+
+
+
+
+
+
+
+# Добавляем основные файлы
+git add .
+# Или выборочно
+git add .gitignore fastapi-notes.txt main.py docker-compose.yml requirements.txt app/
+
+# Проверяем что будет добавлено
+git status
+
+# Делаем первый коммит
+git commit -m "Initial commit: FastAPI pet project with PostgreSQL"
